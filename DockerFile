@@ -1,0 +1,22 @@
+# Use the official Microsoft.NET SDK image as the base image
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build-env
+WORKDIR /app
+
+# Copy csproj and restore dependencies
+COPY *.csproj./
+RUN dotnet restore
+
+# Copy everything else and build the app
+COPY../
+RUN dotnet publish -c Release -o out
+
+# Use the official Microsoft.NET runtime image for the final stage
+FROM mcr.microsoft.com/dotnet/aspnet:6.0
+WORKDIR /app
+COPY --from=build-env /app/out.
+
+# Make port 80 available to the world outside this container
+EXPOSE 80
+
+# Define the command to run your app using CMD which defines your runtime
+CMD ["dotnet", "MyWebApp.dll"]
